@@ -1,0 +1,6 @@
+@CodeLingo.Backend_HostAddress = http://localhost:5058
+
+GET {{CodeLingo.Backend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
