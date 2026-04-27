@@ -1,12 +1,13 @@
 using CodeLingo.Backend.Models;
 using CodeLingo.Backend.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CodeLingo.Backend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AuthController : ControllerBase
+    public class AuthController : BaseApiController
     {
         private readonly UserService _userService;
 
@@ -36,6 +37,22 @@ namespace CodeLingo.Backend.Controllers
             if (result == null)
             {
                 return Unauthorized("Invalid email or password");
+            }
+
+            return Ok(result);
+        }
+
+        [Authorize]
+        [HttpGet("me")]
+        public IActionResult Me()
+        {
+            int userId = GetCurrentUserId();
+
+            var result = _userService.GetProfile(userId);
+
+            if (result == null)
+            {
+                return NotFound("User not found");
             }
 
             return Ok(result);

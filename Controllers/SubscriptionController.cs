@@ -23,16 +23,36 @@ namespace CodeLingo.Backend.Controllers
             return Ok(_service.GetStatus(userId));
         }
 
-        [HttpPost("upgrade")]
-        public IActionResult Upgrade()
+        [HttpPost("create-checkout")]
+        public IActionResult CreateCheckout()
         {
             int userId = GetCurrentUserId();
 
-            var result = _service.UpgradeToPremium(userId);
+            var result = _service.CreateCheckoutSession(userId);
+
+            if (result.ToString() == "User not found")
+            {
+                return NotFound(result);
+            }
+
+            return Ok(result);
+        }
+
+        [HttpPost("confirm")]
+        public IActionResult Confirm()
+        {
+            int userId = GetCurrentUserId();
+
+            var result = _service.ConfirmPayment(userId);
 
             if (result == "User not found")
             {
                 return NotFound(result);
+            }
+
+            if (result == "No Stripe session found" || result == "Payment not completed")
+            {
+                return BadRequest(result);
             }
 
             return Ok(result);

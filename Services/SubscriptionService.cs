@@ -24,13 +24,74 @@ namespace CodeLingo.Backend.Services
             };
         }
 
-        public string UpgradeToPremium(int userId)
+        public object CreateCheckoutSession(int userId)
         {
             var user = _context.Users.FirstOrDefault(u => u.Id == userId);
 
             if (user == null)
             {
                 return "User not found";
+            }
+
+            var options = new SessionCreateOptions
+            {
+                PaymentMethodTypes = new List<string> { "card" },
+                Mode = "payment",
+
+                LineItems = new List<SessionLineItemOptions>
+                {
+                    new SessionLineItemOptions
+                    {
+                        Quantity = 1,
+                        PriceData = new SessionLineItemPriceDataOptions
+                        {
+                            Currency = "gbp",
+                            UnitAmount = 499,
+                            ProductData = new SessionLineItemPriceDataProductDataOptions
+                            {
+                                Name = "CodeLingo Premium"
+                            }
+                        }
+                    }
+                },
+
+                SuccessUrl = "https://example.com/success",
+                CancelUrl = "https://example.com/cancel"
+            };
+
+            var service = new SessionService();
+            var session = service.Create(options);
+
+            user.StripeSubscriptionId = session.Id;
+            _context.SaveChanges();
+
+            return new
+            {
+                CheckoutUrl = session.Url,
+                SessionId = session.Id
+            };
+        }
+
+        public string ConfirmPayment(int userId)
+        {
+            var user = _context.Users.FirstOrDefault(u => u.Id == userId);
+
+            if (user == null)
+            {
+                return "User not found";
+            }
+
+            if (string.IsNullOrWhiteSpace(user.StripeSubscriptionId))
+            {
+                return "No Stripe session found";
+            }
+
+            var service = new SessionService();
+            var session = service.Get(user.StripeSubscriptionId);
+
+            if (session.PaymentStatus != "paid")
+            {
+                return "Payment not completed";
             }
 
             user.IsPremium = true;

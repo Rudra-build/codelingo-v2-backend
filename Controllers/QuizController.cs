@@ -1,4 +1,3 @@
-using CodeLingo.Backend.Models;
 using CodeLingo.Backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -29,19 +28,22 @@ namespace CodeLingo.Backend.Controllers
 
             var result = _quizService.GenerateAndSave(userId, materialId, text);
 
-            if (result == "User not found" || result == "Learning material not found")
+            if (result is string error)
             {
-                return NotFound(result);
-            }
+                if (error == "User not found" || error == "Learning material not found")
+                {
+                    return NotFound(error);
+                }
 
-            if (result == "Free users can only generate 1 quiz per day. Upgrade to premium for unlimited quizzes.")
-            {
-                return StatusCode(403, result);
-            }
+                if (error == "Free users can only generate 1 quiz per day. Upgrade to premium for unlimited quizzes.")
+                {
+                    return StatusCode(403, error);
+                }
 
-            if (result == "AI quiz generation failed" || result == "AI quiz validation failed")
-            {
-                return StatusCode(500, result);
+                if (error == "AI quiz generation failed" || error == "AI quiz validation failed")
+                {
+                    return StatusCode(500, error);
+                }
             }
 
             return Created("", result);
@@ -63,7 +65,7 @@ namespace CodeLingo.Backend.Controllers
         }
 
         [HttpPost("submit")]
-        public IActionResult Submit([FromBody] SubmitQuizRequest request)
+        public IActionResult Submit([FromBody] CodeLingo.Backend.Models.SubmitQuizRequest request)
         {
             int userId = GetCurrentUserId();
 
@@ -76,5 +78,29 @@ namespace CodeLingo.Backend.Controllers
 
             return Ok(result);
         }
+
+
+        [HttpPost("check-answer")]
+        public IActionResult CheckAnswer([FromBody] CodeLingo.Backend.Models.CheckAnswerRequest request)
+        {
+            int userId = GetCurrentUserId();
+
+            var result = _quizService.CheckAnswer(userId, request);
+
+            if (result is string error)
+            {
+                if (error == "Quiz not found")
+                {
+                    return NotFound(error);
+                }
+
+                if (error == "Option not found")
+                {
+                    return BadRequest(error);
+                }
+            }
+
+            return Ok(result);
+}
     }
 }

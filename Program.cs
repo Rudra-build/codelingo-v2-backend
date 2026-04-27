@@ -6,7 +6,12 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
+
+using Stripe;
+
 DotNetEnv.Env.Load();
+
+StripeConfiguration.ApiKey = Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY");
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,7 +54,7 @@ builder.Services.AddScoped<QuizService>();
 builder.Services.AddScoped<QuizRepository>();
 builder.Services.AddScoped<LeaderboardService>();
 builder.Services.AddScoped<AnalyticsService>();
-builder.Services.AddScoped<SubscriptionService>();
+builder.Services.AddScoped<CodeLingo.Backend.Services.SubscriptionService>();
 builder.Services.AddScoped<JwtService>();
 
 var app = builder.Build();

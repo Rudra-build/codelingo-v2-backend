@@ -12,7 +12,7 @@ namespace CodeLingo.Backend.Services
             _repository = repository;
         }
 
-        public string Create(int userId, CreateLearningMaterialRequest request)
+        public LearningMaterial Create(int userId, CreateLearningMaterialRequest request)
         {
             var material = new LearningMaterial
             {
@@ -21,9 +21,24 @@ namespace CodeLingo.Backend.Services
                 Content = request.Content
             };
 
-            _repository.Add(material);
+            return _repository.Add(material);
+        }
 
-            return "Learning material saved";
+        public List<LearningMaterial> GetMyMaterials(int userId)
+        {
+            return _repository.GetByUserId(userId);
+        }
+
+        public bool Delete(int userId, int materialId)
+        {
+            var material = _repository.GetByIdAndUserId(materialId, userId);
+
+            if (material == null)
+            {
+                return false;
+            }
+
+            return _repository.Delete(material);
         }
     }
 }

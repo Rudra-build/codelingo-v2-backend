@@ -27,6 +27,7 @@ namespace CodeLingo.Backend.Services
 
             var user = new User
             {
+                Name = request.Name,
                 Email = request.Email,
                 PasswordHash = passwordHash
             };
@@ -58,9 +59,31 @@ namespace CodeLingo.Backend.Services
             {
                 Message = "Login successful",
                 Token = token,
+                Name = user.Name,
                 Email = user.Email,
                 Level = user.Level,
                 IsPremium = user.IsPremium
+            };
+        }
+
+        public object? GetProfile(int userId)
+        {
+            var user = _userRepository.GetUserById(userId);
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            return new
+            {
+                user.Name,
+                user.Email,
+                user.Level,
+                user.CurrentStreak,
+                user.LongestStreak,
+                user.TotalQuizzesCompleted,
+                user.IsPremium
             };
         }
     }

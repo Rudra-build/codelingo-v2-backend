@@ -19,5 +19,27 @@ namespace CodeLingo.Backend.Repositories
 
             return material;
         }
+
+        public List<LearningMaterial> GetByUserId(int userId)
+        {
+            return _context.LearningMaterials
+                .Where(m => m.UserId == userId)
+                .OrderByDescending(m => m.CreatedAt)
+                .ToList();
+        }
+
+        public LearningMaterial? GetByIdAndUserId(int id, int userId)
+        {
+            return _context.LearningMaterials
+                .FirstOrDefault(m => m.Id == id && m.UserId == userId);
+        }
+
+        public bool Delete(LearningMaterial material)
+        {
+            _context.LearningMaterials.Remove(material);
+            _context.SaveChanges();
+
+            return true;
+        }
     }
 }

@@ -21,7 +21,7 @@ namespace CodeLingo.Backend.Services
                 .Select(u => new
                 {
                     u.Id,
-                    u.Email,
+                    u.Name,
                     u.Level,
                     u.CurrentStreak,
                     u.TotalQuizzesCompleted

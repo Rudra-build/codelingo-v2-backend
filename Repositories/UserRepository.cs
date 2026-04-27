@@ -24,5 +24,10 @@ namespace CodeLingo.Backend.Repositories
 
             return user;
         }
+
+        public User? GetUserById(int id)
+        {
+            return _context.Users.FirstOrDefault(user => user.Id == id);
+        }
     }
 }

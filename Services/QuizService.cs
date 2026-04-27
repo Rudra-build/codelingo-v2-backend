@@ -18,7 +18,7 @@ namespace CodeLingo.Backend.Services
             _quizRepository = quizRepository;
         }
 
-        public string GenerateAndSave(int userId, int materialId, string content)
+        public object GenerateAndSave(int userId, int materialId, string content)
         {
             var user = _context.Users.FirstOrDefault(u => u.Id == userId);
 
@@ -98,7 +98,40 @@ namespace CodeLingo.Backend.Services
 
             _context.SaveChanges();
 
-            return $"Quiz saved at Level {level}";
+            return new GenerateQuizResponse
+                {
+                    Message = $"Quiz saved at Level {level}",
+                    QuizId = quiz.Id,
+                    Level = level
+                };
+        }
+
+        public object CheckAnswer(int userId, CheckAnswerRequest request)
+        {
+            var quiz = _context.Quizzes
+                .FirstOrDefault(q => q.Id == request.QuizId && q.UserId == userId);
+
+            if (quiz == null)
+            {
+                return "Quiz not found";
+            }
+
+            var selectedOption = _context.Options
+                .FirstOrDefault(o =>
+                    o.Id == request.SelectedOptionId &&
+                    o.QuestionId == request.QuestionId &&
+                    o.Question.QuizId == request.QuizId);
+
+            if (selectedOption == null)
+            {
+                return "Option not found";
+            }
+
+            return new CheckAnswerResponse
+            {
+                IsCorrect = selectedOption.IsCorrect,
+                Message = selectedOption.IsCorrect ? "Correct!" : "Wrong!"
+            };
         }
 
         public string SubmitQuiz(int userId, SubmitQuizRequest request)
